@@ -1,0 +1,656 @@
+<!doctype html>
+<html>
+<head>
+<title>Socket.IO chat</title>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+	integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+	crossorigin="anonymous">
+<style>
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font: 13px Helvetica, Arial;
+}
+
+form {
+	padding: 3px;
+	bottom: 0;
+	width: 100%;
+}
+
+form input {
+	border: 0;
+	padding: 10px;
+	width: 90%;
+	margin-right: .5%;
+	font-size: 17px;
+	resize:none;
+	line-height: 24px;
+	border-color: rgb(0, 175, 216);
+	border-radius: 2em;
+}
+
+form button {
+	width: 100%;
+	background: rgb(0, 175, 216);
+	border-color: rgb(0, 175, 216);
+	color: #ffffff;
+	padding: 10px;
+	font-size: 17px;
+	border-radius: 2em;
+	line-height: 24px;
+}
+
+#messages {
+    position: relative;
+    -ms-overflow-style: none;
+    margin-top: 10px;
+    width: 100%;
+    padding-bottom: 24px;
+    float: left;
+}
+
+.message-operator {
+    color: #06132b;
+    background: #f0f2f7;
+    float: left;
+}
+
+.message {
+    padding: 10px 16px;
+    border-radius: 20px;
+    margin: 2px 0;
+    font-size: 15px;
+    line-height: 20px;
+    word-wrap: break-word;
+    display: inline-block;
+    max-width: 85%;
+    clear: both;
+    position: relative;
+    -webkit-transition: margin 0.28s ease-in-out;
+    -o-transition: margin 0.28s ease-in-out;
+    transition: margin 0.28s ease-in-out;
+}
+
+.message span.message-content {
+    white-space: pre-line;
+}
+
+.message-operator+.message-visitor {
+    margin-top: 9px;
+}
+
+#conversation-group {
+    padding: 0 28px;
+    width: 100%;
+    height: 357px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    will-change: auto;
+    -ms-overflow-style: none;
+    background: #fff;
+    -webkit-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    transition: all 0.3s;
+    max-height: 357px;
+    min-height: 160px;
+}
+
+.message-visitor {
+    color: #fff;
+    background: -webkit-linear-gradient(118deg, #21dbdb, #2979ff);
+    background: -o-linear-gradient(118deg, #21dbdb, #2979ff);
+    background: linear-gradient(332deg, #21dbdb, #2979ff);
+    float: right;
+}
+
+.not-ie #conversation-group {
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+}
+
+#messages li {
+	padding: 5px 10px;
+}
+
+#messages li:nth-child(odd) {
+	background: #eee;
+}
+
+
+.start-group.chrome {
+	-webkit-box-shadow: 0 8px 36px 0 rgba(0, 18, 46, 0.16);
+	box-shadow: 0 8px 36px 0 rgba(0, 18, 46, 0.16);
+}
+
+.start-group {
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-direction: column;
+	flex-direction: column;
+	width: 372px;
+	position: absolute;
+	bottom: 26px;
+	border-radius: 16px;
+	overflow: hidden;
+	pointer-events: auto;
+	-webkit-box-shadow: 0 8px 26px 0 rgba(0, 18, 46, 0.16);
+	box-shadow: 0 8px 26px 0 rgba(0, 18, 46, 0.16);
+	z-index: 1;
+	right: 48px;
+}
+
+.chat-header {
+	padding: 24px 28px 0;
+	background: -webkit-linear-gradient(151deg, #00e0d8, #201d8e);
+	background: -o-linear-gradient(151deg, #00e0d8, #201d8e);
+	background: linear-gradient(-61deg, #00e0d8, #201d8e);
+	position: relative;
+	z-index: 4;
+}
+
+.start-group textarea {
+	border: 0;
+	width: auto;
+	font-size: 17px;
+	padding: 20px 0 14px 0;
+	resize: none;
+	line-height: 24px;
+}
+
+textarea {
+	border: 0;
+	width: 100%;
+	font-size: 17px;
+	padding: 20px 0 14px 0;
+	resize: none;
+	line-height: 24px;
+	overflow-x: hidden;
+	-ms-overflow-style: none;
+}
+
+.start-group .chat-header h2,.start-group .chat-header .start-message,.start-group .chat-header .offline-message
+	{
+	z-index: 2;
+}
+
+.start-group h2 {
+	font-weight: 400;
+	font-size: 42px;
+	color: #303f9f;
+	margin: 6px 0 16px 0;
+	padding-top: 4px;
+	display: inline-block;
+	position: relative;
+	max-width: calc(100% - 90px);
+	line-height: 50px;
+	white-space: pre-line;
+	-webkit-text-stroke: 0.4px;
+	padding-left: 14px;
+}
+
+button.material-icons.exit-chat,label.material-icons.exit-chat {
+	margin-right: -3px;
+}
+
+button.material-icons {
+	background: none;
+	border: 0;
+	color: inherit;
+	font: inherit;
+	line-height: normal;
+	overflow: visible;
+	padding: 0;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	outline: none;
+}
+
+button.material-icons,label.material-icons {
+	cursor: pointer;
+	position: relative;
+	z-index: 1;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	margin: 15px 0 8px 11px;
+	float: right;
+}
+
+button.material-icons svg#ic_close,button.material-icons svg.options-icon,label.material-icons svg#ic_close,label.material-icons svg.options-icon
+	{
+	fill: currentColor;
+}
+
+.chat-header #ic_close {
+	height: 28px;
+	width: 28px;
+}
+
+.start-group button.i-banner svg {
+	fill: currentColor;
+}
+
+button.material-icons.options svg,button.material-icons.exit-chat svg,label.material-icons.options svg,label.material-icons.exit-chat svg
+	{
+	fill: currentColor;
+	width: 26px;
+	height: 26px;
+}
+
+button.material-icons svg,label.material-icons svg {
+	fill: #8894ab;
+}
+
+svg {
+	width: 26px;
+	height: 26px;
+	fill: #fff;
+	-webkit-transition: all 0.2s ease-in-out;
+	-o-transition: all 0.2s ease-in-out;
+	transition: all 0.2s ease-in-out;
+}
+
+.start-group p {
+	font-size: 16px;
+}
+
+.start-message {
+	color: currentColor;
+	font-size: 15px;
+	margin: 0 0 32px 0;
+	line-height: 22px;
+	position: relative;
+	padding-left: 14px;
+	padding-right: 100px;
+}
+
+.emoji {
+	width: 20px;
+	margin: 0 2px -5px 2px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.start-group .operators {
+	display: -ms-flexbox;
+	display: flex;
+	position: absolute;
+	top: 92px;
+	-ms-flex-direction: column;
+	flex-direction: column;
+	height: calc(100% - 92px);
+	right: 42px;
+}
+
+.start-group .ava48 {
+	width: 66px;
+	height: 66px;
+	border-radius: 31px;
+	margin-bottom: 20px;
+	background-size: cover;
+	background-position: center;
+	display: inline-block;
+	background-image:
+		url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAMDAwMDAwQEBAQFBQUF…AAAAAAAAAAAED/2gAIAQIBAT8AB//EABQRAQAAAAAAAAAAAAAAAAAAAED/2gAIAQMBAT8AB//Z);
+	-ms-flex: 0 0 auto;
+	flex: 0 0 auto;
+	position: relative;
+	z-index: 2;
+}
+
+.no-clip-path .offline-message {
+	padding: 14px 28px 20px;
+}
+
+.offline-message {
+	margin: 18px -28px 0px;
+	color: currentColor;
+	width: calc(100% + 56px);
+	padding: 14px 28px 7px;
+	position: relative;
+	background-size: 100% calc(100% + 12px);
+	z-index: 1;
+}
+
+.offline-message span.online {
+	padding-left: 20px;
+}
+
+.offline-message span {
+	z-index: 2;
+	position: relative;
+	display: inline-block;
+	font-size: 16px;
+}
+
+.start-group .input-group {
+	z-index: 4;
+}
+
+.not-ie .input-group {
+	-ms-flex: 0 0 auto;
+	flex: 0 0 auto;
+}
+
+.input-group {
+	padding: 0 28px 6px;
+	width: 100%;
+	position: relative;
+	background: #fff;
+	z-index: 3;
+}
+
+.input-group .footer-bottom {
+	height: 42px;
+	position: relative;
+}
+
+.input-group .footer-bottom button {
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	float: left;
+	margin: 0 16px 14px 0;
+}
+
+button.material-icons {
+	background: none;
+	border: 0;
+	color: inherit;
+	font: inherit;
+	line-height: normal;
+	overflow: visible;
+	padding: 0;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	outline: none;
+}
+
+button.material-icons,label.material-icons {
+	cursor: pointer;
+	position: relative;
+	z-index: 1;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	margin: 15px 0 8px 11px;
+	float: right;
+}
+
+.powered {
+	display: -ms-flexbox;
+	display: flex;
+	text-decoration: none;
+	color: #8894ab;
+	font-weight: 400;
+	font-size: 10px;
+	direction: ltr;
+	margin-right: 25px;
+	float: right;
+}
+
+#button.chat-open {
+	right: 0;
+	left: auto;
+}
+
+#button {
+	position: absolute;
+	width: 112px;
+	height: 140px;
+	bottom: 12px;
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-align: center;
+	align-items: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	pointer-events: none;
+	z-index: 1;
+	right: 0;
+}
+
+.chat.chrome {
+    -webkit-box-shadow: 0 8px 36px 0 rgba(0,18,46,0.16);
+    box-shadow: 0 8px 36px 0 rgba(0,18,46,0.16);
+}
+
+.chat.not-ie {
+    max-height: calc(100% - 47px);
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+}
+
+.chat {
+    width: 372px;
+    position: absolute;
+    bottom: 26px;
+    border-radius: 16px;
+    pointer-events: auto;
+    -webkit-box-shadow: 0 8px 22px 0 rgba(0,18,46,0.16);
+    box-shadow: 0 8px 22px 0 rgba(0,18,46,0.16);
+    overflow: hidden;
+    z-index: 1;
+    right: 48px;
+    left: auto;
+}
+
+.chat-header.project-online {
+    padding: 24px 28px 0;
+}
+
+.not-ie .chat-header {
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+}
+
+.chat h2.oneline {
+    margin-top: 0;
+    font-size: 22px;
+    line-height: 52px;
+}
+
+.chat h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: currentColor;
+    margin: 4px 0 0 0;
+    padding: 0;
+    display: inline-block;
+    position: relative;
+    max-width: calc(100% - 145px);
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    vertical-align: bottom;
+}
+
+
+</style>
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+	integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+	crossorigin="anonymous"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+	crossorigin="anonymous"></script>
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+	integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+	crossorigin="anonymous"></script>
+
+
+</head>
+<body>
+
+	<div
+		class="start-group not-ie chrome no-clip-path no-start-message moveFromRight-enter-done"
+		data-testid="welcomeView">
+		<div class="chat-header"
+			style="background: linear-gradient(135deg, rgb(42, 39, 218) 0%, rgb(0, 204, 255) 100%); color: rgb(255, 255, 255);">
+			<h2 class="h2-banner" style="color: rgb(255, 255, 255);">
+				<span>Chat with us!</span>
+			</h2>
+			<button class="material-icons exit-chat i-banner" type="button"
+				aria-label="" style="color: rgb(255, 255, 255);">
+				<svg id="ic_close" fill="#000000" height="24" viewBox="0 0 24 24"
+					width="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path
+						d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+            <path d="M0 0h24v24H0z" fill="none"></path>
+         </svg>
+			</button>
+			<button class="material-icons options i-banner" type="button"
+				aria-label="Open options dropdown"
+				style="color: rgb(255, 255, 255);">
+				<svg id="ic_options" class="options-icon" fill="#000000" height="24"
+					viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"
+					aria-hidden="true">
+            <path d="M0 0h24v24H0z" fill="none"></path>
+            <path
+						d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path>
+         </svg>
+			</button>
+			<p class="start-message">
+				<span>Hello there!<img class="emoji" draggable="false"
+					alt="??" src="https://twemoji.maxcdn.com/2/72x72/1f44b.png">
+					We make it seamless for businesses and people to talk to each
+					other. Ask us anything.
+				</span>
+			</p>
+
+			<div class="offline-message"
+				style="background-image: linear-gradient(135deg, rgba(42, 39, 218, 0.7) 0%, rgba(0, 204, 255, 0.7) 100%);">
+				<span class="online">We're online!</span>
+			</div>
+		</div>
+		<div class="input-group  ">
+			<div>
+				<div id="user-form" style="text-align: center; padding-top: 10px;">
+				<form>
+				<div class="container">
+							<div class="row">
+							<div class="col-sm-8 col-8">
+					 <input id="username" name="username" placeholder="Your Email..."
+						type="text"> 
+						</div><div class="col-sm-4 col-4">
+						<button id="un_btn">Submit</button>
+						</div>
+						</div></div>
+</form>
+				</div>
+			</div>
+			<div id="chat" style="display:none">
+				<div id="conversation-group" role="log">
+				<div id="messages"></div></div>
+				<div class="drag-active-wrapper">
+					<form>
+						<div class="container">
+							<div class="row">
+
+								<div class="col-sm-8 col-8">
+									<textarea id="m" rows="1" placeholder="Your message..."
+										class=" " aria-label="New message"
+										data-testid="newMessageTextarea"></textarea>
+								</div>
+								<div class="col-sm-4 col-4">
+									<button>Send</button>
+								</div>
+
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		$(function() {
+			var socket = io("/to-admin");
+			var initTime;
+			var room;
+			// socket.emit("subscribe", { room: "global" });
+			var username = "";
+			$('form').submit(
+					function(e) {
+						e.preventDefault();
+						socket.emit('chat message', $('#m').val(), $(
+								"#username").val(), room);
+						$('#m').val('');
+					});
+
+			socket.on('set room', function(data) {
+				room = data.room;
+			});
+
+			socket.on('chat message', function(data) {
+				var fromMessage = "";
+				var style = "";
+				if (data.username === "Prime Bot")
+					fromMessage = "message-operator";
+					else { 
+						fromMessage = "message-visitor";
+						style = 'style="background: linear-gradient(135deg, rgb(42, 39, 218), rgb(0, 204, 255)); color: rgb(255, 255, 255); width: 161px;"';
+					}
+				$('#messages').append("<div class='message " + fromMessage + " ' "+ style + "><span class='message-content'>"+ data.message + "</span></div>");
+				// socket.emit('save message', data, data.message)
+			});
+
+			$("#un_btn").click(function(e) {
+				e.preventDefault();
+				if ($("#username").val() !== "") {
+					username = $("#username").val();
+					initTime = (new Date().getTime());
+					socket.emit("subscribe", {
+						room : initTime,
+						username : username
+					});
+					$("#user-form").hide();
+					$(".start-message").hide();
+					$(".start-group").addClass("chat");
+					$(".chat").removeClass("start-group");
+					$(".chat-header").addClass("project-online");
+					$(".h2-banner").addClass("oneline");
+					$(".oneline").removeClass("h2-banner")
+					$(".oneline").attr("style","");
+					$("#chat").show();
+				}
+				return false;
+			});
+			
+			$(".exit-chat").on("click", function(e) { 
+				$("#username").val("");
+				$('#messages').html("");
+				$("#user-form").show();
+				$(".start-message").show();
+				$(".chat").addClass("start-group");
+				$(".start-group").removeClass("chat");
+				
+				$(".chat-header").removeClass("project-online");
+				$(".oneline").addClass("h2-banner")
+				$(".h2-banner").removeClass("oneline");
+				
+				$(".h2-banner").attr("style","color: rgb(255, 255, 255);");
+				$("#chat").hide();
+			});
+
+			$(document).ready(function() {
+				window.resizeTo(400, 400);
+			});
+		});
+	</script>
+
+
+</body>
+</html>
