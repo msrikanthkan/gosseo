@@ -11,7 +11,7 @@ var rooms = [];
 var userInRooms = [];
 const nsp = io.of('/to-admin');
 app.get('/', function(req, res) {
-	res.sendFile(__dirname + '/index1.html');
+	res.sendFile(__dirname + '/index.html');
 });
 
 app.get('/admin', function(req, res) {
