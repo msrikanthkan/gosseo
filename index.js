@@ -1,10 +1,6 @@
-const express = require('express');
-const path = require('path');
-const serverless = require('serverless-http');
-const app = express();
-const bodyParser = require('body-parser');
-
-var io = require('socket.io')(serverless);
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 var Window = require('window');
 
 window = new Window();
@@ -169,5 +165,6 @@ io.on('connection', function(socket) {
 	});
 });
 
-module.exports = app;
-module.exports.handler = serverless(app);
+http.listen(3000, function() {
+	console.log('server listening on port 3000');
+});
