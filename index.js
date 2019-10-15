@@ -24,6 +24,7 @@ nsp.on('connection', function(socket) {
 	var room;
 	
 	console.log('connected to : to-admin namespace');
+	socket.emit('news', { hello: 'world' });
 
 	socket.on('disconnect', function() {
 		console.log('user disconnected from \'to-admin\' namespace');
@@ -161,6 +162,8 @@ io.on('connection', function(socket) {
 		io.emit('to admin', socket, username + ': ' + msg);
 
 	});
+	
+	socket.emit('news', { hello: 'world' });
 
 	socket.on('from admin', function(msg, userSocket) {
 		userSocket.emit('chat message', 'admin: ' + msg);
