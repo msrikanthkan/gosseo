@@ -3,6 +3,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var Window = require('window');
 
+http.listen(80);
+
 window = new Window();
 var $ = require("jquery")(window);
 
@@ -165,6 +167,4 @@ io.on('connection', function(socket) {
 	});
 });
 
-http.listen(9043, function() {
-	console.log('server listening on port 3000');
-});
+
