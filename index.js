@@ -4,8 +4,8 @@ const serverless = require('serverless-http');
 const app = express();
 const bodyParser = require('body-parser');
 
-var io = require('socket.io')(serverless);
-var Window = require('window');
+const io = require('socket.io')(serverless);
+const Window = require('window');
 
 window = new Window();
 var $ = require("jquery")(window);
