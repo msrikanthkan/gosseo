@@ -593,6 +593,11 @@ button.material-icons,label.material-icons {
 			socket.on('set room', function(data) {
 				room = data.room;
 			});
+			
+			socket.on('news', function (data) {
+    				console.log(data);
+    				// socket.emit('my other event', { my: 'data' });
+  			});
 
 			socket.on('chat message', function(data) {
 				var fromMessage = "";
