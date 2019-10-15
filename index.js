@@ -1,9 +1,9 @@
 var app = require('express')();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var io = require('socket.io')(80);
 var Window = require('window');
 
-http.listen(80);
+// http.listen(80);
 
 window = new Window();
 var $ = require("jquery")(window);
