@@ -1,6 +1,6 @@
 var app = require('express')();
 var http = require('http').Server(app);
-var io = require('socket.io')(80);
+var io = require('socket.io')(3000);
 var Window = require('window');
 
 // http.listen(80);
